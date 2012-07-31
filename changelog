@@ -21,7 +21,7 @@ turnkey-joomla25-12.0 (1) turnkey; urgency=low
 
   * Major component versions
 
-    joomla          2.5.4 (upstream archive)
+    joomla          2.5.6 (upstream archive)
     apache2         2.2.16-6+squeeze7
     mysql-server    5.1.63-0+squeeze1
     phpmyadmin      4:3.3.7-7
