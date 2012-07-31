@@ -1,6 +1,6 @@
-turnkey-joomla16-11.1 (1) turnkey; urgency=low
+turnkey-joomla25-12.0 (1) turnkey; urgency=low
 
-  * Initial public release of TurnKey Linux Joomla16 (version 1.6).
+  * Initial public release of TurnKey Linux Joomla25 (version 2.5).
 
   * Set Joomla admin email and password on firstboot (convenience, security).
 
@@ -19,15 +19,15 @@ turnkey-joomla16-11.1 (1) turnkey; urgency=low
   * Includes postfix MTA (bound to localhost) for sending of email (e.g.
     password recovery). Also includes webmin postfix module for convenience.
 
-  * Major component versions:
+  * Major component versions
 
-    joomla          1.6 (upstream tarball)
-    mysql-server    5.1.41-3ubuntu12.8
-    apache2         2.2.14-5ubuntu8.4
-    phpmyadmin      4:3.3.2-1
+    joomla          2.5.4 (upstream archive)
+    apache2         2.2.16-6+squeeze7
+    mysql-server    5.1.63-0+squeeze1
+    phpmyadmin      4:3.3.7-7
 
   * Note: Please refer to turnkey-core's changelog for changes common to all
     appliances. Here we only describe changes specific to this appliance.
 
- -- Alon Swartz <alon@turnkeylinux.org>  Wed, 12 Jan 2011 15:01:05 +0200
+ -- Alon Swartz <alon@turnkeylinux.org>  Wed, 01 Aug 2012 08:00:00 +0200
 
