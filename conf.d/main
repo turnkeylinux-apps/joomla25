@@ -36,7 +36,7 @@ touch $CONF
 chown www-data:www-data $CONF
 
 # update apache configuration
-a2dissite default
+a2dissite 000-default
 a2ensite joomla
 a2enmod rewrite
 
