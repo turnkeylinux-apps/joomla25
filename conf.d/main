@@ -9,12 +9,26 @@ DB_NAME=joomla
 DB_USER=joomla
 DB_PASS=$(mcookie)
 
+SRC=/usr/local/src
 WEBROOT=/var/www/joomla
 mkdir -p $WEBROOT
 
+## install composer
+#curl -sS https://getcomposer.org/installer | php
+#mv composer.phar /usr/local/bin/composer
+
+#composer global require joomlatools/joomla-console
+#cat > ~/.profile.d/composer-path << "EOF"
+#PATH=$PATH:~/.composer/vendor/bin
+#EOF
+
+#chmod +x ~/.profile.d/composer-path
+#. ~/.profile.d/composer-path
+
+#joomla site:create joomla --ssl-key=/etc/ssl/certs/cert.pem --ssl-crt=/etc/ssl/certs/cert.pem --mysql_db_prefix="_" --mysql=root:
+
 # unpack tarball to webroot and set permissions
-tar -zxf /usr/local/src/Joomla*.tar.gz -C $WEBROOT
-rm -f /usr/local/src/Joomla*
+tar -zxf $SRC/Joomla*.tar.gz -C $WEBROOT
 chown -R www-data:www-data $WEBROOT
 
 # convenience execution variables
@@ -30,10 +44,16 @@ $MYSQL_ADMIN create $DB_NAME
 # create database user with privileges on the database
 $MYSQL_BATCH --execute "grant all privileges on $DB_NAME.* to $DB_USER@localhost identified by '$DB_PASS'; flush privileges;"
 
-# create configuration file for installer to configure
+# copy in precreated configuration file
 CONF=$WEBROOT/configuration.php
-touch $CONF
-chown www-data:www-data $CONF
+mv $SRC/joomla_configuration.php $CONF
+#chown www-data:www-data $CONF
+
+# write DB tables using Joomla SQL
+SQL=$WEBROOT/installation/sql/mysql/joomla.sql
+DEFAULT_PREFIX='#__'
+sed -i "s|$DEFAULT_PREFIX|$DB_PREFIX|" $SQL
+$MYSQL_BATCH $DB_NAME < $SQL
 
 # update apache configuration
 a2dissite 000-default
@@ -43,24 +63,32 @@ a2enmod rewrite
 # perform installation
 /etc/init.d/apache2 start
 
-URL="http://127.0.0.1/installation/index.php"
-CURL="curl -c /tmp/cookie -b /tmp/cookie"
+#URL="http://127.0.0.1/installation/index.php"
+#CURL="curl -c /tmp/cookie -b /tmp/cookie"
 
-EMAIL=$(echo $ADMIN_MAIL | sed s/@/%40/)
-SEC=$($CURL -s $URL |grep value=\"1\"|awk {'print $3'}|sed 's|\"||g'|sed 's|name=||')
+#EMAIL=$(echo $ADMIN_MAIL | sed s/@/%40/)
+#SEC=$($CURL -s $URL |grep value=\"1\"|awk {'print $3'}|sed 's|\"||g'|sed 's|name=||')
 
-$CURL $URL --data "jform%5Blanguage%5D=en-US&task=setup.setlanguage&$SEC=1"
-$CURL ${URL}?view=preinstall
-$CURL ${URL}?view=license
-$CURL ${URL}?view=database
-$CURL $URL --data "jform%5Bdb_type%5D=mysqli&jform%5Bdb_host%5D=localhost&jform%5Bdb_user%5D=$DB_USER&jform%5Bdb_pass%5D=$DB_PASS&jform%5Bdb_name%5D=$DB_NAME&jform%5Bdb_prefix%5D=$DB_PREFIX&jform%5Bdb_old%5D=remove&task=setup.database&$SEC=1"
-$CURL ${URL}?view=filesystem
-$CURL $URL --data "jform%5Bftp_enable%5D=0&jform%5Bftp_user%5D=&jform%5Bftp_pass%5D=&jform%5Bftp_root%5D=&jform%5Bftp_host%5D=127.0.0.1&jform%5Bftp_port%5D=21&jform%5Bftp_save%5D=0&task=setup.filesystem&$SEC=1"
-$CURL $URL --data "jform%5Bsite_name%5D=TurnKey+Joomla&jform%5Bsite_metadesc%5D=&jform%5Bsite_metakeys%5D=&jform%5Badmin_email%5D=$ADMIN_MAIL&jform%5Badmin_user%5D=$ADMIN_NAME&jform%5Badmin_password%5D=$ADMIN_PASS&jform%5Badmin_password2%5D=$ADMIN_PASS&task=setup.saveconfig&$SEC=1&jform%5Bsample_installed%5D=0"
-$CURL ${URL}?view=complete
+#exit 1
 
+#$CURL $URL --data "format: json&jform%5Bsite_name%5D=TurnKey+Joomla&jform%5Bsite_metadesc%5D=&jform%5Badmin_email%5D=$EMAIL&jform%5Badmin_user%5D=admin&jform%5Badmin_password%5D=turnkey&jform%5Badmin_password2%5D=$ADMIN_PASS&jform%5Bsite_offline%5D=0&task=site&$SEC=1"
+
+#$CURL $URL --data "format: json&jform%5Bdb_type%5D=mysqli&jform%5Bdb_host%5D=localhost&jform%5Bdb_user%5D=joomla&jform%5Bdb_pass%5D=$DB_PASS&jform%5Bdb_name%5D=joomla&jform%5Bdb_prefix%5D=tkl_&jform%5Bdb_old%5D=remove&task=database&$SEC=1"
+#format: json&jform%5Bdb_type%5D=mysqli&jform%5Bdb_host%5D=localhost&jform%5Bdb_user%5D=joomla&jform%5Bdb_pass%5D=turnkey&jform%5Bdb_name%5D=joomla&jform%5Bdb_prefix%5D=tkl_&jform%5Bdb_old%5D=remove&task=database&46ba8f8c0f9bee793841f16a6de45f0f=1
+
+#$CURL $URL --data "format: json&$SEC=1" 
+
+#$CURL $URL --data "jform%5Blanguage%5D=en-US&task=setup.setlanguage&$SEC=1"
+#$CURL ${URL}?view=preinstall
+#$CURL ${URL}?view=license
+#$CURL ${URL}?view=database
+#$CURL $URL --data "jform%5Bdb_type%5D=mysqli&jform%5Bdb_host%5D=localhost&jform%5Bdb_user%5D=$DB_USER&jform%5Bdb_pass%5D=$DB_PASS&jform%5Bdb_name%5D=$DB_NAME&jform%5Bdb_prefix%5D=$DB_PREFIX&jform%5Bdb_old%5D=remove&task=setup.database&$SEC=1"
+#$CURL ${URL}?view=filesystem
+#$CURL $URL --data "jform%5Bftp_enable%5D=0&jform%5Bftp_user%5D=&jform%5Bftp_pass%5D=&jform%5Bftp_root%5D=&jform%5Bftp_host%5D=127.0.0.1&jform%5Bftp_port%5D=21&jform%5Bftp_save%5D=0&task=setup.filesystem&$SEC=1"
+#$CURL $URL --data "jform%5Bsite_name%5D=TurnKey+Joomla&jform%5Bsite_metadesc%5D=&jform%5Bsite_metakeys%5D=&jform%5Badmin_email%5D=$ADMIN_MAIL&jform%5Badmin_user%5D=$ADMIN_NAME&jform%5Badmin_password%5D=$ADMIN_PASS&jform%5Badmin_password2%5D=$ADMIN_PASS&task=setup.saveconfig&$SEC=1&jform%5Bsample_installed%5D=0"
+#$CURL ${URL}?view=complete
 # remove installation directory
-rm -rf $WEBROOT/installation
+#rm -rf $WEBROOT/installation
 
 # enable clean urls
 mv $WEBROOT/htaccess.txt $WEBROOT/.htaccess
@@ -73,8 +101,9 @@ $MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO ${DB_PREFIX}content VALU
 $MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO ${DB_PREFIX}content_frontpage VALUES (1,1);"
 
 $MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO ${DB_PREFIX}assets VALUES ('35', '27', '19', '20', '3', 'com_content.article.1', 'Welcome to TurnKey Joomla', '{\"core.delete\":[],\"core.edit\":[],\"core.edit.state\":[]}');"
-
+exit 1
 # stop services
 /etc/init.d/apache2 stop
 /etc/init.d/mysql stop
 
+#rm -f /usr/local/src/Joomla*
