@@ -13,20 +13,6 @@ SRC=/usr/local/src
 WEBROOT=/var/www/joomla
 mkdir -p $WEBROOT
 
-## install composer
-#curl -sS https://getcomposer.org/installer | php
-#mv composer.phar /usr/local/bin/composer
-
-#composer global require joomlatools/joomla-console
-#cat > ~/.profile.d/composer-path << "EOF"
-#PATH=$PATH:~/.composer/vendor/bin
-#EOF
-
-#chmod +x ~/.profile.d/composer-path
-#. ~/.profile.d/composer-path
-
-#joomla site:create joomla --ssl-key=/etc/ssl/certs/cert.pem --ssl-crt=/etc/ssl/certs/cert.pem --mysql_db_prefix="_" --mysql=root:
-
 # unpack tarball to webroot and set permissions
 tar -zxf $SRC/Joomla*.tar.gz -C $WEBROOT
 chown -R www-data:www-data $WEBROOT
@@ -48,6 +34,7 @@ $MYSQL_BATCH --execute "grant all privileges on $DB_NAME.* to $DB_USER@localhost
 CONF=$WEBROOT/configuration.php
 mv $SRC/joomla_configuration.php $CONF
 #chown www-data:www-data $CONF
+sed -i "s|^.*public \$password = '.*|    public \$password = '$DB_PASS';|" $CONF
 
 # write DB tables using Joomla SQL
 SQL=$WEBROOT/installation/sql/mysql/joomla.sql
@@ -95,12 +82,18 @@ mv $WEBROOT/htaccess.txt $WEBROOT/.htaccess
 sed -i "s|^# RewriteBase /|RewriteBase /|" $WEBROOT/.htaccess
 sed -i "s|sef_rewrite = '0'|sef_rewrite = '1'|" $CONF
 
+# create admin user
+$MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO jos_users (name, username, password, params) VALUES ('Administrator', 'admin', '33ae057566e62ea2453b4d4b56f824ad:p947xCSxeYhyTChRAsnSETa9fdnqo7Fl', '');"
+$MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO jos_user_usergroup_map (user_id, group_id) VALUES (LAST_INSERT_ID(),'8');"
+
 # create welcome post
-$MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO ${DB_PREFIX}content VALUES ('1', '35', 'Welcome to TurnKey Joomla', 'welcome', '', '<h2>Getting started</h2><p></p><ul><li>Log into the <a href=\"administrator\">administration console</a> as <strong>admin</strong></li> <li>Refer to the <a href=\"http://www.turnkeylinux.org/joomla25\">TurnKey Joomla release notes</a></li><li>Refer to the <a href=\"http://docs.joomla.org\">Joomla documentation</a></li></ul><p></p>', '', '1', '0', '0', '2', '2010-01-01 00:00:00', '42', '', '2010-01-01 00:00:00', '0', '0', '2010-01-01 00:00:00', '2010-01-01 00:00:00', '2020-01-01 00:00:00', '', '', '{\"show_title\":\"\",\"link_titles\":\"\",\"show_intro\":\"\",\"show_category\":\"\",\"link_category\":\"\",\"show_parent_category\":\"\",\"link_parent_category\":\"\",\"show_author\":\"\",\"link_author\":\"\",\"show_create_date\":\"\",\"show_modify_date\":\"\",\"show_publish_date\":\"\",\"show_item_navigation\":\"\",\"show_icons\":\"\",\"show_print_icon\":\"\",\"show_email_icon\":\"\",\"show_vote\":\"\",\"show_hits\":\"\",\"show_noauth\":\"\",\"alternative_readmore\":\"\",\"article_layout\":\"\"}', '1', '0', '1', '', '', '1', '0', '', '1', '*', '');"
+#$MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO ${DB_PREFIX}content VALUES ('1', '54', 'Welcome to TurnKey Joomla', 'welcome-to-turnkey-joomla', '<h2>Getting started</h2><p></p><ul><li>Log into the <a href=\"administrator\">administration console</a> as <strong>admin</strong></li> <li>Refer to the <a href=\"http://www.turnkeylinux.org/joomla25\">TurnKey Joomla release notes</a></li><li>Refer to the <a href=\"http://docs.joomla.org\">Joomla documentation</a></li></ul><p></p>', '', '', '2', '2015-06-01 00:00:00', '42', '', '2015-06-01 00:00:00', '0', '0', '0000-00-00 00:00:00', '2015-06-01 00:00:00', '0000-00-00 00:00:00', '', '', '{\"show_title\":\"\",\"link_titles\":\"\",\"show_intro\":\"\",\"show_category\":\"\",\"link_category\":\"\",\"show_parent_category\":\"\",\"link_parent_category\":\"\",\"show_author\":\"\",\"link_author\":\"\",\"show_create_date\":\"\",\"show_modify_date\":\"\",\"show_publish_date\":\"\",\"show_item_navigation\":\"\",\"show_icons\":\"\",\"show_print_icon\":\"\",\"show_email_icon\":\"\",\"show_vote\":\"\",\"show_hits\":\"\",\"show_noauth\":\"\",\"alternative_readmore\":\"\",\"article_layout\":\"\"}', '1', '1', '', '', '1', '0', '', '1', '', '');"
+
+$MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO ${DB_PREFIX}content VALUES (1 , 54, 'Welcome to TurnKey Joomla', 'welcome-to-turnkey-joomla-2','<h2>Getting started</h2>\r\n<p> </p>\r\n<ul>\r\n<li>Log into the <a href=\"administrator\">administration console</a> as <strong>admin</strong></li>\r\n<li>Refer to the <a href=\"http://www.turnkeylinux.org/joomla25\">TurnKey Joomla release notes</a></li>\r\n<li>Refer to the <a href=\"http://docs.joomla.org\">Joomla documentation</a></li>\r\n</ul>\r\n<p> </p>','',1,2,'2015-06-01 00:00:00',42,'','2015-07-03 07:40:46',2,0,'0000-00-00 00:00:00','2015-06-01 00:00:00','0000-00-00 00:00:00','','','{\"show_title\":\"\",\"link_titles\":\"\",\"show_intro\":\"\",\"show_category\":\"\",\"link_category\":\"\",\"show_parent_category\":\"\",\"link_parent_category\":\"\",\"show_author\":\"\",\"link_author\":\"\",\"show_create_date\":\"\",\"show_modify_date\":\"\",\"show_publish_date\":\"\",\"show_item_navigation\":\"\",\"show_icons\":\"\",\"show_print_icon\":\"\",\"show_email_icon\":\"\",\"show_vote\":\"\",\"show_hits\":\"\",\"show_noauth\":\"\",\"alternative_readmore\":\"\",\"article_layout\":\"\"}',2,1,'','',1,0,'',1,'*','');"
 
 $MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO ${DB_PREFIX}content_frontpage VALUES (1,1);"
 
-$MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO ${DB_PREFIX}assets VALUES ('35', '27', '19', '20', '3', 'com_content.article.1', 'Welcome to TurnKey Joomla', '{\"core.delete\":[],\"core.edit\":[],\"core.edit.state\":[]}');"
+$MYSQL_BATCH --database=$DB_NAME --execute "INSERT INTO ${DB_PREFIX}assets VALUES ('54', '27', '19', '20', '3', 'com_content.article.1', 'Welcome to TurnKey Joomla', '{\"core.delete\":[],\"core.edit\":[],\"core.edit.state\":[]}');"
 exit 1
 # stop services
 /etc/init.d/apache2 stop
