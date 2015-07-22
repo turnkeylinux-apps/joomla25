@@ -1,4 +1,4 @@
-Joomla 2.5 - Cutting Edge Content Management
+Joomla 3.x - Cutting Edge Content Management
 ============================================
 
 `Joomla!`_ is an award-winning Content Management System (CMS) for
@@ -11,12 +11,12 @@ internationalization.
 This appliance includes all the standard features in `TurnKey Core`_,
 and on top of that:
 
-- Joomla 2.5 configurations:
+- Joomla 3.x configurations:
    
    - Installed from upstream source code to /var/www/joomla
 
 - SSL support out of the box.
-- `PHPMyAdmin`_ administration frontend for MySQL (listening on port
+- `Adminer`_ administration frontend for MySQL (listening on port
   12322 - uses SSL).
 - Postfix MTA (bound to localhost) to allow sending of email (e.g.,
   password recovery).
@@ -25,10 +25,10 @@ and on top of that:
 Credentials *(passwords set at first boot)*
 -------------------------------------------
 
--  Webmin, SSH, MySQL, phpMyAdmin: username **root**
+-  Webmin, SSH, MySQL, Adminer: username **root**
 -  Joomla: username **admin**
 
 
 .. _Joomla!: http://www.joomla.org/
 .. _TurnKey Core: http://www.turnkeylinux.org/core
-.. _PHPMyAdmin: http://www.phpmyadmin.net
+.. _Adminer: http://www.adminer.org
